@@ -336,37 +336,67 @@ docker-compose up -d
 - Ensure OAuth consent screen is configured
 
 ### Port Already in Use
-Change port in application.properties or set `PORT` environment variable
+```powershell
+# Kill process using port 8080
+netstat -ano | findstr :8080
+taskkill /PID <process-id> /F
 
-## Documentation
-
-For detailed setup instructions, see [SETUP.md](SETUP.md)
-
-## Project Structure
-
-```
-src/
-├── main/
-│   ├── java/com/xeno/crm_backend/
-│   │   ├── config/          # Configuration classes
-│   │   ├── controller/      # REST API controllers
-│   │   ├── model/          # Domain models
-│   │   ├── repository/     # MongoDB repositories
-│   │   └── pubsub/         # Event system
-│   └── resources/
-│       └── application.properties
-└── test/
-    └── java/               # Test classes
+# Or use different port
+$env:PORT = "8081"
+.\mvnw.cmd spring-boot:run
 ```
 
-## License
+## 📁 Project Structure
+
+```
+CRM_BACKEND-main/
+├── src/
+│   ├── main/
+│   │   ├── java/com/xeno/crm_backend/
+│   │   │   ├── config/                    # Configuration classes
+│   │   │   │   ├── CorsConfig.java        # CORS configuration
+│   │   │   │   └── SecurityConfig.java    # Security & OAuth config
+│   │   │   ├── controller/                # REST API endpoints
+│   │   │   │   ├── CampaignController.java
+│   │   │   │   ├── CustomerController.java
+│   │   │   │   └── ...
+│   │   │   ├── model/                     # Domain models
+│   │   │   ├── repository/                # MongoDB repositories
+│   │   │   └── pubsub/                    # Event system
+│   │   └── resources/
+│   │       ├── application.properties      # Default config
+│   │       ├── application-local.properties
+│   │       └── application-test.properties
+│   └── test/                              # Test files
+├── target/                                # Build output (gitignored)
+├── mvnw.cmd                               # Maven wrapper (Windows)
+├── pom.xml                                # Maven dependencies
+├── Dockerfile                             # Docker configuration
+├── .env.ps1                               # Environment variables (gitignored)
+├── run-local.ps1                          # Local run script
+└── README.md                              # This file
+```
+
+## 📚 Additional Documentation
+
+- [MongoDB Setup Guide](MONGODB_SETUP.md)
+- [Setup Guide](SETUP.md)
+- [Status Document](STATUS.md)
+
+## 📄 License
 
 This project is for educational purposes.
 
-## Contributing
+## 🤝 Contributing
 
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+Pull requests are welcome! For major changes, please open an issue first.
 
-## Support
+## 🆘 Support
 
-For questions or issues, please open a GitHub issue.
+For questions or issues, open a [GitHub Issue](https://github.com/kinshukkush/CRM-BACKEND/issues).
+
+---
+
+**Built with ❤️ using Spring Boot and MongoDB**
+
+**Repository:** https://github.com/kinshukkush/CRM-BACKEND
