@@ -1,4 +1,4 @@
-﻿# 🚀 CRM Backend
+# 🚀 CRM Backend
 
 A modern Spring Boot-based CRM (Customer Relationship Management) backend with MongoDB Atlas and Google OAuth 2.0 authentication.
 
