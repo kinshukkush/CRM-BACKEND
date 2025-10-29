@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = {"https://xenoprojectcrm.netlify.app", "http://localhost:3000"}, allowCredentials = "true")
+@CrossOrigin(origins = {"https://crm-frontend-three-wheat.vercel.app", "http://localhost:3000", "http://localhost:3001"}, allowCredentials = "true")
 public class UserController {
 
     @GetMapping("/user")

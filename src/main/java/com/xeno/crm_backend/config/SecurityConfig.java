@@ -1,5 +1,6 @@
 package com.xeno.crm_backend.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,9 @@ public class SecurityConfig {
 
     @Value("${frontend.url:http://localhost:3000}")
     private String frontendUrl;
+
+    @Autowired
+    private OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -39,7 +43,7 @@ public class SecurityConfig {
             .oauth2Login(oauth2 -> oauth2
                 .authorizationEndpoint(auth -> auth.baseUri("/oauth2/authorization"))
                 .redirectionEndpoint(redir -> redir.baseUri("/login/oauth2/code/*"))
-                .defaultSuccessUrl(frontendUrl + "/home", true)
+                .successHandler(oAuth2SuccessHandler)
                 .failureUrl("/login?error=true")
             )
             .sessionManagement(session -> session
