@@ -1,5 +1,6 @@
 package com.xeno.crm_backend.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,6 +15,9 @@ import java.util.Arrays;
 
 @Configuration
 public class SecurityConfig {
+
+    @Value("${frontend.url:http://localhost:3000}")
+    private String frontendUrl;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -35,7 +39,7 @@ public class SecurityConfig {
             .oauth2Login(oauth2 -> oauth2
                 .authorizationEndpoint(auth -> auth.baseUri("/oauth2/authorization"))
                 .redirectionEndpoint(redir -> redir.baseUri("/login/oauth2/code/*"))
-                .defaultSuccessUrl("http://localhost:3000/", true)
+                .defaultSuccessUrl(frontendUrl + "/home", true)
                 .failureUrl("/login?error=true")
             )
             .sessionManagement(session -> session
@@ -45,7 +49,7 @@ public class SecurityConfig {
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("http://localhost:3000/")
+                .logoutSuccessUrl(frontendUrl + "/")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
             );
@@ -56,7 +60,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(Arrays.asList(
-            "http://localhost:3000"
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "https://crm-frontend-three-wheat.vercel.app"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
