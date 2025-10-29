@@ -118,84 +118,212 @@ Once the application is running:
 - **Google OAuth Login:** `http://localhost:8080/oauth2/authorization/google`
 - **API Endpoints:** See [API Documentation](#-api-endpoints) below
 
-## API Endpoints
+## 📡 API Endpoints
 
-### Authentication
-- `GET /login` - Initiate Google OAuth login
-- `GET /logout` - Logout
+### 🔐 Authentication
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/oauth2/authorization/google` | Initiate Google OAuth login | No |
+| GET | `/login` | Login page redirect | No |
+| GET | `/logout` | Logout user | Yes |
+| GET | `/oauth/success` | OAuth success callback | No |
+| GET | `/api/user` | Get current user info | Yes |
 
-### Customer Management
-- `GET /api/customers` - List all customers
-- `POST /api/customers` - Create new customer
-- `PUT /api/customers/{id}` - Update customer
-- `DELETE /api/customers/{id}` - Delete customer
+### 👥 Customer Management
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/customers` | List all customers | Yes |
+| POST | `/api/customers` | Create new customer | Yes |
+| PUT | `/api/customers/{id}` | Update customer | Yes |
+| DELETE | `/api/customers/{id}` | Delete customer | Yes |
+| POST | `/api/customers/filter` | Filter customers by criteria | Yes |
 
-### Campaign Management
-- `GET /api/campaigns` - List campaigns
-- `POST /api/campaigns` - Create campaign
-- `GET /api/campaigns/{id}` - Get campaign details
+### 📧 Campaign Management
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/campaigns` | List all campaigns | Yes |
+| POST | `/api/campaigns` | Create new campaign | Yes |
+| GET | `/api/campaigns/{id}` | Get campaign details | Yes |
+| GET | `/api/campaigns/stats/{id}` | Get campaign statistics | Yes |
 
-### Order Management
-- `POST /api/orders` - Create order
-- `GET /api/orders` - List orders
+### 🛍️ Order Management
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/orders` | List all orders | Yes |
+| POST | `/api/orders` | Create new order | Yes |
 
-### Other
-- `POST /vendor/send` - Send message via vendor (public endpoint)
-- `POST /api/delivery-receipt` - Delivery receipt webhook (public)
-- `GET /api/user` - Get current authenticated user
+### 🔔 Messaging & Delivery
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/vendor/send` | Send message via vendor | No (Public) |
+| POST | `/api/delivery-receipt` | Delivery receipt webhook | No (Public) |
 
-## Configuration
+### 🧪 Health & Monitoring
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/actuator/health` | Application health status | No |
 
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `MONGODB_URI` | MongoDB connection string | `mongodb://localhost:27017/xeno_crm` |
-| `GOOGLE_CLIENT_ID` | Google OAuth Client ID | Required |
-| `GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret | Required |
-| `PORT` | Server port | `8080` |
-
-### Application Profiles
-
-- **default** - Production configuration
-- **local** - Local development configuration
-
-Run with profile:
-```powershell
-.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=local
-```
-
-## Development
+## 💻 Development Commands
 
 ### Build Project
 ```powershell
+# Clean and build
 .\mvnw.cmd clean install
+
+# Build without tests
+.\mvnw.cmd clean install -DskipTests
+
+# Build with specific profile
+.\mvnw.cmd clean install -Plocal
 ```
 
 ### Run Tests
 ```powershell
+# Run all tests
 .\mvnw.cmd test
+
+# Run specific test class
+.\mvnw.cmd test -Dtest=CrmBackendApplicationTests
+
+# Run with coverage
+.\mvnw.cmd test jacoco:report
 ```
 
-### Package JAR
+### Package Application
 ```powershell
+# Create JAR file
 .\mvnw.cmd clean package
+
+# Create JAR without tests
+.\mvnw.cmd clean package -DskipTests
+
+# JAR will be created in: target/crm_backend-0.0.1-SNAPSHOT.jar
 ```
 
-## Docker Deployment
+### Run Packaged JAR
+```powershell
+# After packaging, run the JAR directly
+java -jar target/crm_backend-0.0.1-SNAPSHOT.jar
 
-Build and run with Docker:
+# With environment variables
+$env:MONGODB_URI = "your-connection-string"
+$env:GOOGLE_CLIENT_ID = "your-client-id"
+$env:GOOGLE_CLIENT_SECRET = "your-secret"
+java -jar target/crm_backend-0.0.1-SNAPSHOT.jar
+```
 
+### Clean Build Artifacts
+```powershell
+# Clean target directory
+.\mvnw.cmd clean
+
+# Deep clean (including dependencies)
+Remove-Item -Path target -Recurse -Force
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+| Variable | Description | Required | Example |
+|----------|-------------|----------|---------|
+| `MONGODB_URI` | MongoDB connection string | Yes | `mongodb+srv://user:pass@cluster.mongodb.net/?appName=CRM` |
+| `GOOGLE_CLIENT_ID` | Google OAuth Client ID | Yes | `123456-abc.apps.googleusercontent.com` |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret | Yes | `GOCSPX-xxxxxxxxxxxxx` |
+| `PORT` | Server port | No | `8080` (default) |
+| `SPRING_PROFILES_ACTIVE` | Active profile | No | `local`, `test`, `prod` |
+
+### Application Profiles
+
+**1. Default Profile** (`application.properties`)
+- Used for production
+- Requires all environment variables
+- CORS configured for production domains
+
+**2. Local Profile** (`application-local.properties`)
+- Used for local development
+- Relaxed CORS settings
+- Debug logging enabled
+
+**3. Test Profile** (`application-test.properties`)
+- Used for testing
+- In-memory configurations
+- Mock external services
+
+**Running with profiles:**
+```powershell
+# Local profile
+.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=local
+
+# Test profile
+.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=test
+
+# Production (default)
+.\mvnw.cmd spring-boot:run
+```
+
+### CORS Configuration
+
+Frontend domains are configured in `CorsConfig.java`:
+```java
+// Update this for your frontend URLs
+configuration.setAllowedOrigins(Arrays.asList(
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://your-frontend-domain.com"
+));
+```
+
+## 🐳 Docker Deployment
+
+### Build Docker Image
 ```bash
+# Build image
 docker build -t crm-backend .
+
+# Build with specific tag
+docker build -t crm-backend:v1.0 .
+```
+
+### Run Docker Container
+```bash
+# Run with environment variables
 docker run -p 8080:8080 \
-  -e MONGODB_URI="your-mongodb-uri" \
+  -e MONGODB_URI="mongodb+srv://user:pass@cluster.mongodb.net/?appName=CRM" \
   -e GOOGLE_CLIENT_ID="your-client-id" \
-  -e GOOGLE_CLIENT_SECRET="your-client-secret" \
+  -e GOOGLE_CLIENT_SECRET="your-secret" \
+  crm-backend
+
+# Run in detached mode
+docker run -d -p 8080:8080 \
+  -e MONGODB_URI="your-connection-string" \
+  -e GOOGLE_CLIENT_ID="your-client-id" \
+  -e GOOGLE_CLIENT_SECRET="your-secret" \
+  --name crm-backend-container \
   crm-backend
 ```
 
-## Troubleshooting
+### Docker Compose (Optional)
+Create `docker-compose.yml`:
+```yaml
+version: '3.8'
+services:
+  backend:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+```
+
+Run with:
+```bash
+docker-compose up -d
+```
+
+## 🚨 Troubleshooting
 
 ### MongoDB Connection Issues
 - Ensure MongoDB is running: `mongod`
