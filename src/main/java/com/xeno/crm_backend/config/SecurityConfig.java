@@ -40,6 +40,18 @@ public class SecurityConfig {
                 .requestMatchers("/api/**", "/vendor/**").authenticated()
                 .anyRequest().permitAll()
             )
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint((request, response, authException) -> {
+                    // Return 401 for API requests instead of redirecting to login
+                    if (request.getRequestURI().startsWith("/api/")) {
+                        response.setStatus(401);
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"Authentication required\"}");
+                    } else {
+                        response.sendRedirect("/oauth2/authorization/google");
+                    }
+                })
+            )
             .oauth2Login(oauth2 -> oauth2
                 .authorizationEndpoint(auth -> auth.baseUri("/oauth2/authorization"))
                 .redirectionEndpoint(redir -> redir.baseUri("/login/oauth2/code/*"))
