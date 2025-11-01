@@ -24,40 +24,52 @@ public class UserController {
     @GetMapping("/user")
     public ResponseEntity<?> getUser(HttpServletRequest request) {
         try {
+            System.out.println("UserController - /api/user called");
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            System.out.println("UserController - Authentication: " + (authentication != null ? authentication.getName() : "null"));
             
             if (authentication == null || !authentication.isAuthenticated() || 
                 authentication.getPrincipal().equals("anonymousUser")) {
-                System.out.println("No authentication found or anonymous user");
+                System.out.println("UserController - No authentication found or anonymous user");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Not authenticated"));
             }
 
+            Map<String, Object> userInfo = new HashMap<>();
+            
             // Check if JWT claims are available (JWT auth)
             Claims claims = (Claims) request.getAttribute("userClaims");
-            Map<String, Object> userInfo = new HashMap<>();
             
             if (claims != null) {
                 // JWT authentication
-                System.out.println("Authenticated via JWT: " + claims.get("email"));
+                System.out.println("UserController - Authenticated via JWT: " + claims.get("email"));
                 userInfo.put("email", claims.get("email"));
                 userInfo.put("name", claims.get("name"));
                 userInfo.put("picture", claims.get("picture"));
             } else {
-                // OAuth2 session authentication (fallback)
-                OAuth2User user = (OAuth2User) authentication.getPrincipal();
-                System.out.println("Authenticated via OAuth2 session: " + user.getAttribute("email"));
-                userInfo.put("email", user.getAttribute("email"));
-                userInfo.put("name", user.getAttribute("name"));
-                userInfo.put("picture", user.getAttribute("picture"));
+                // Try OAuth2 session authentication (fallback)
+                try {
+                    OAuth2User user = (OAuth2User) authentication.getPrincipal();
+                    System.out.println("UserController - Authenticated via OAuth2 session: " + user.getAttribute("email"));
+                    userInfo.put("email", user.getAttribute("email"));
+                    userInfo.put("name", user.getAttribute("name"));
+                    userInfo.put("picture", user.getAttribute("picture"));
+                } catch (ClassCastException e) {
+                    // Not OAuth2User, try to get from authentication name
+                    System.out.println("UserController - Using authentication name as fallback");
+                    userInfo.put("email", authentication.getName());
+                    userInfo.put("name", authentication.getName());
+                    userInfo.put("picture", "");
+                }
             }
             
+            System.out.println("UserController - Returning user info: " + userInfo);
             return ResponseEntity.ok(userInfo);
         } catch (Exception e) {
-            System.err.println("Error in getUser: " + e.getMessage());
+            System.err.println("UserController - Error in getUser: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Internal server error"));
+                .body(Map.of("error", "Internal server error", "message", e.getMessage()));
         }
     }
 }
