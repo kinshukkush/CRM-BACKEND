@@ -15,7 +15,8 @@ import java.util.Map;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret:your-secret-key-must-be-at-least-256-bits-long-for-HS256-algorithm}")
+    @Value("${jwt.secret=crm-jwt-secret-key-2f4c9e8b13d547f09a7d4c6fba1e2c38-2025-production\r\n" + //
+                "}")
     private String secret;
 
     @Value("${jwt.expiration:86400000}") // 24 hours in milliseconds
