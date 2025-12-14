@@ -10,11 +10,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/api")
@@ -70,6 +74,43 @@ public class UserController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", "Internal server error", "message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            System.out.println("UserController - /api/logout called");
+            
+            // Invalidate session
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                System.out.println("UserController - Invalidating session");
+                session.invalidate();
+            }
+            
+            // Clear security context
+            SecurityContextHolder.clearContext();
+            
+            // Clear cookies
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    System.out.println("UserController - Clearing cookie: " + cookie.getName());
+                    cookie.setValue("");
+                    cookie.setPath("/");
+                    cookie.setMaxAge(0);
+                    response.addCookie(cookie);
+                }
+            }
+            
+            System.out.println("UserController - Logout successful");
+            return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
+        } catch (Exception e) {
+            System.err.println("UserController - Error in logout: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Logout failed", "message", e.getMessage()));
         }
     }
 }

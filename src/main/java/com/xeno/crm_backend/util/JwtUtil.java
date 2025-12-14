@@ -18,7 +18,7 @@ public class JwtUtil {
     @Value("${jwt.secret:crm-jwt-secret-key-must-be-at-least-256-bits-long-for-hs256-algorithm-security-2024}")
     private String secret;
 
-    @Value("${jwt.expiration:86400000}") // 24 hours in milliseconds
+    @Value("${jwt.expiration:864000}") 
     private Long expiration;
 
     private Key getSigningKey() {

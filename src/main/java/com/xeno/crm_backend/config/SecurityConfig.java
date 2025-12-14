@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .requestMatchers("/", "/login**", "/error", "/actuator/**").permitAll()
                 .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                 .requestMatchers("/api/ai/**").permitAll()
+                .requestMatchers("/api/logout").permitAll()
                 .requestMatchers("/api/user").authenticated() 
                 .requestMatchers("/api/**", "/vendor/**").authenticated()
                 .anyRequest().permitAll()
@@ -58,7 +59,9 @@ public class SecurityConfig {
                 })
             )
             .oauth2Login(oauth2 -> oauth2
-                .authorizationEndpoint(auth -> auth.baseUri("/oauth2/authorization"))
+                .authorizationEndpoint(auth -> auth
+                    .baseUri("/oauth2/authorization")
+                )
                 .redirectionEndpoint(redir -> redir.baseUri("/login/oauth2/code/*"))
                 .successHandler(oAuth2SuccessHandler)
                 .failureUrl("/login?error=true")

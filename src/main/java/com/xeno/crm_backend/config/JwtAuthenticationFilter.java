@@ -36,8 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         
         String token = null;
         String email = null;
-
-        // Extract token from Authorization header
+        
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
             System.out.println("JWT Filter - Token extracted, length: " + token.length());
@@ -49,8 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 e.printStackTrace();
             }
         }
-
-        // Validate token and set authentication
+        
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
                 if (jwtUtil.validateToken(token) && !jwtUtil.isTokenExpired(token)) {
